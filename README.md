@@ -5,60 +5,60 @@ A research-based NLP web application for classifying Urdu sentence pairs into 14
 ## Installation
 
 1. **Clone the repository**
-   \`\`\`bash
+   ```bash
    git clone https://github.com/mumarasif/urdu-paraphrase-webapp.git
    cd urdu-paraphrase-webapp
-   \`\`\`
+   ```
 
 2. **Create virtual environment**
-   \`\`\`bash
+   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   \`\`\`
+   ```
 
 3. **Install dependencies**
-   \`\`\`bash
+   ```bash
    pip install -r requirements.txt
-   \`\`\`
+   ```
 
 4. **Setup database**
-   \`\`\`bash
+   ```bash
    python manage.py migrate
    python manage.py runserver
-   \`\`\`
+   ```
 
 5. **Access the application**
    Open your browser and go to `http://127.0.0.1:8000`
 
 ## Create and Work on a New Branch
 1. Before starting any new work always sync your local project with the latest version from GitHub:
-   \`\`\`bash
+   ```bash
    git checkout main
    git pull origin main
-   \`\`\`
+   ```
    
 2. Always create a new branch for a feature or a task. This avoids conflicts and keeps work separate.
 
    👉 Example:
    You're working on the classification page:
-   \`\`\`bash
+   ```bash
    git checkout -b feature/classify-page
-   \`\`\`
+   ```
    
 3. Now you're on the new branch. Make changes in classify.html, test locally, then:
-   \`\`\`bash
+   ```bash
    git add .
    git commit -m "Added frontend layout for classify page"
-   \`\`\`
+   ```
 
 4. Push your branch:
-   \`\`\`bash
+   ```bash
    git push origin feature/classify-page
-   \`\`\`
+   ```
 
 ## Project Structure
 
-\`\`\`
+```
 urdu-paraphrase-webapp/
 ├── manage.py
 ├── requirements.txt
@@ -82,7 +82,7 @@ urdu-paraphrase-webapp/
 │       └── eda.html
 └── scripts/
     └── setup_database.sql
-\`\`\`
+```
 
 ## Usage
 
