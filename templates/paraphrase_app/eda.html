@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}EDA - Urdu Paraphrase Classification{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 english-text mb-4">
+            <i class="fas fa-chart-bar mr-3 text-purple-600"></i>
+            Dataset Analysis & Insights
+        </h1>
+        <h2 class="text-2xl font-semibold urdu-text mb-4">
+            ڈیٹاسیٹ کا تجزیہ اور بصیرت
+        </h2>
+        <p class="text-gray-600 english-text max-w-3xl mx-auto">
+            Explore comprehensive visual insights and statistical analysis of our Urdu paraphrase dataset used for training the classification model.
+        </p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid md:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white rounded-2xl p-6 card-shadow text-center">
+            <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-database text-blue-600 text-xl"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800 english-text">5250</div>
+            <div class="text-sm text-gray-600 english-text">Total Sentence Pairs</div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-6 card-shadow text-center">
+            <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-tags text-green-600 text-xl"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800 english-text">14</div>
+            <div class="text-sm text-gray-600 english-text">Paraphrase Types</div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-6 card-shadow text-center">
+            <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-language text-purple-600 text-xl"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800 english-text">90%</div>
+            <div class="text-sm text-gray-600 english-text">Model Accuracy</div>
+        </div>
+        
+        <div class="bg-white rounded-2xl p-6 card-shadow text-center">
+            <div class="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800 english-text">15.8</div>
+            <div class="text-sm text-gray-600 english-text">Avg. Sentence Length</div>
+        </div>
+    </div>
+
+    <!-- Class Distribution Chart -->
+    <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 english-text">
+                <i class="fas fa-pie-chart mr-3 text-indigo-600"></i>
+                Paraphrase Type Distribution
+            </h3>
+            <p class="text-sm text-gray-600 urdu-text">پیرافریز کی اقسام کی تقسیم</p>
+        </div>
+        <div class="h-96">
+            <canvas id="classDistributionChart"></canvas>
+        </div>
+        <p class="text-gray-600 english-text mt-4 text-center">
+            Distribution of different paraphrase types in our training dataset
+        </p>
+    </div>
+
+    <!-- Sentence Length Distribution -->
+    <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 english-text">
+                <i class="fas fa-ruler mr-3 text-green-600"></i>
+                Sentence Length Distribution
+            </h3>
+            <p class="text-sm text-gray-600 urdu-text">جملوں کی لمبائی کی تقسیم</p>
+        </div>
+        <div class="h-80">
+            <canvas id="lengthDistributionChart"></canvas>
+        </div>
+        <p class="text-gray-600 english-text mt-4 text-center">
+            Histogram showing the distribution of sentence lengths (word count) in the dataset
+        </p>
+    </div>
+
+    <!-- Sample Examples -->
+    <div class="bg-white rounded-2xl p-8 card-shadow">
+        <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+            <i class="fas fa-eye mr-3 text-blue-600"></i>
+            Sample Dataset Examples
+        </h3>
+        
+        <div class="space-y-6">
+            <!-- Lexical Example -->
+            <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+                        <i class="fas fa-word mr-2"></i>Lexical Paraphrase
+                    </span>
+                    <span class="text-sm text-gray-500 english-text">95.2% Confidence</span>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 english-text mb-2">Original:</p>
+                        <p class="urdu-text text-gray-800 text-lg">میں کل دفتر جاؤں گا</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 english-text mb-2">Paraphrase:</p>
+                        <p class="urdu-text text-gray-800 text-lg">میں کل کام پر جاؤں گا</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Syntactic Example -->
+            <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+                        <i class="fas fa-code-branch mr-2"></i>Syntactic Paraphrase
+                    </span>
+                    <span class="text-sm text-gray-500 english-text">89.7% Confidence</span>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 english-text mb-2">Original:</p>
+                        <p class="urdu-text text-gray-800 text-lg">بچہ کھیل رہا ہے</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 english-text mb-2">Paraphrase:</p>
+                        <p class="urdu-text text-gray-800 text-lg">کھیل رہا ہے بچہ</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Semantic Example -->
+            <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium">
+                        <i class="fas fa-brain mr-2"></i>Semantic Paraphrase
+                    </span>
+                    <span class="text-sm text-gray-500 english-text">91.4% Confidence</span>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 english-text mb-2">Original:</p>
+                        <p class="urdu-text text-gray-800 text-lg">وہ بہت خوش ہے</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 english-text mb-2">Paraphrase:</p>
+                        <p class="urdu-text text-gray-800 text-lg">وہ بہت خوشی محسوس کر رہا ہے</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Class Distribution Chart
+    const classCtx = document.getElementById('classDistributionChart').getContext('2d');
+    new Chart(classCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ class_distribution.labels|safe }},
+            datasets: [{
+                label: 'Number of Examples',
+                data: {{ class_distribution.data|safe }},
+                backgroundColor: [
+                    '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444',
+                    '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6366F1',
+                    '#14B8A6', '#F59E0B', '#8B5CF6', '#EF4444'
+                ],
+                borderColor: [
+                    '#2563EB', '#059669', '#7C3AED', '#D97706', '#DC2626',
+                    '#0891B2', '#65A30D', '#EA580C', '#DB2777', '#4F46E5',
+                    '#0D9488', '#D97706', '#7C3AED', '#DC2626'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6B7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6B7280',
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+
+    // Length Distribution Chart
+    const lengthCtx = document.getElementById('lengthDistributionChart').getContext('2d');
+    new Chart(lengthCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ length_stats.labels|safe }},
+            datasets: [{
+                label: 'Number of Sentences',
+                data: {{ length_stats.data|safe }},
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderColor: 'rgba(5, 150, 105, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6B7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6B7280'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

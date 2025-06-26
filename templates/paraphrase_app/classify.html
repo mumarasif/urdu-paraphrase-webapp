@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Classify - Urdu Paraphrase Classification{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 english-text mb-4">
+            <i class="fas fa-search mr-3 text-indigo-600"></i>
+            Sentence Pair Classification
+        </h1>
+        <p class="text-gray-600 english-text max-w-2xl mx-auto">
+            Enter two Urdu sentences to identify the type of paraphrase relationship between them with confidence scoring.
+        </p>
+    </div>
+
+    <!-- Classification Form -->
+    <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+        <form id="classification-form">
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <label for="sentence1" class="block text-sm font-medium text-gray-700 english-text mb-3">
+                        <i class="fas fa-quote-left mr-2 text-indigo-600"></i>
+                        First Sentence
+                    </label>
+                    <textarea id="sentence1" name="sentence1" rows="6" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent urdu-text text-lg resize-none"
+                              placeholder="یہاں پہلا اردو جملہ لکھیں..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="sentence2" class="block text-sm font-medium text-gray-700 english-text mb-3">
+                        <i class="fas fa-quote-right mr-2 text-indigo-600"></i>
+                        Second Sentence 
+                    </label>
+                    <textarea id="sentence2" name="sentence2" rows="6" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent urdu-text text-lg resize-none"
+                              placeholder="یہاں دوسرا اردو جملہ لکھیں..."></textarea>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" id="classify-btn" 
+                        class="inline-flex items-center px-8 py-4 btn-primary text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all">
+                    <i class="fas fa-brain mr-3"></i>
+                    <span id="btn-text">Classify Paraphrase Type</span>
+                    <div id="loading-spinner" class="hidden ml-3">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+        <div class="bg-white rounded-2xl p-8 card-shadow">
+            <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+                <i class="fas fa-chart-line mr-3 text-green-600"></i>
+                Classification Results
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Result Card -->
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-tag mr-2 text-indigo-600"></i>
+                        Paraphrase Type
+                    </h4>
+                    <div id="paraphrase-type" class="text-3xl font-bold text-indigo-600 english-text mb-2"></div>
+                    <div id="paraphrase-type-urdu" class="text-xl font-semibold urdu-text text-gray-600"></div>
+                </div>
+                
+                <!-- Confidence Score -->
+                <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-percent mr-2 text-green-600"></i>
+                        Confidence Score
+                    </h4>
+                    <div id="confidence-score" class="text-3xl font-bold text-green-600 english-text mb-2"></div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="confidence-bar" class="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-1000"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Explanation -->
+            <div class="mt-8 bg-gray-50 rounded-xl p-6">
+                <h4 class="text-lg font-semibold text-gray-800 english-text mb-3">
+                    <i class="fas fa-lightbulb mr-2 text-orange-600"></i>
+                    Explanation
+                </h4>
+                <p id="explanation" class="text-gray-600 english-text"></p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="mt-8 text-center space-x-4">
+                <button id="try-another" 
+                        class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-redo mr-2"></i>
+                    Try Another
+                </button>
+                <a href="{% url 'paraphrase_app:paraphrase' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+                    <i class="fas fa-edit mr-2"></i>
+                    Generate Paraphrase
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sample Examples -->
+    <div class="mt-12 bg-white rounded-2xl p-8 card-shadow">
+        <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+            <i class="fas fa-lightbulb mr-3 text-orange-600"></i>
+            Sample Examples
+        </h3>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer sample-example"
+                 data-s1="میں کل دفتر جاؤں گا" data-s2="میں کل کام پر جاؤں گا">
+                <div class="flex items-center mb-3">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Lexical</span>
+                </div>
+                <p class="urdu-text text-gray-800 mb-2">میں کل دفتر جاؤں گا</p>
+                <p class="urdu-text text-gray-600">میں کل کام پر جاؤں گا</p>
+            </div>
+            
+            <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer sample-example"
+                 data-s1="بچہ کھیل رہا ہے" data-s2="کھیل رہا ہے بچہ">
+                <div class="flex items-center mb-3">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Syntactic</span>
+                </div>
+                <p class="urdu-text text-gray-800 mb-2">بچہ کھیل رہا ہے</p>
+                <p class="urdu-text text-gray-600">کھیل رہا ہے بچہ</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('classification-form');
+    const classifyBtn = document.getElementById('classify-btn');
+    const btnText = document.getElementById('btn-text');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const resultsSection = document.getElementById('results-section');
+    
+    // Sample examples click handlers
+    document.querySelectorAll('.sample-example').forEach(example => {
+        example.addEventListener('click', function() {
+            document.getElementById('sentence1').value = this.dataset.s1;
+            document.getElementById('sentence2').value = this.dataset.s2;
+        });
+    });
+    
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const sentence1 = document.getElementById('sentence1').value.trim();
+        const sentence2 = document.getElementById('sentence2').value.trim();
+        
+        if (!sentence1 || !sentence2) {
+            alert('Please enter both sentences');
+            return;
+        }
+        
+        // Show loading state
+        classifyBtn.disabled = true;
+        btnText.textContent = 'Classifying...';
+        loadingSpinner.classList.remove('hidden');
+        resultsSection.classList.add('hidden');
+        
+        try {
+            const response = await fetch('{% url "paraphrase_app:api_classify" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sentence1: sentence1,
+                    sentence2: sentence2
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Display results
+            document.getElementById('paraphrase-type').textContent = data.paraphrase_type;
+            document.getElementById('confidence-score').textContent = `${(data.confidence * 100).toFixed(1)}%`;
+            document.getElementById('confidence-bar').style.width = `${data.confidence * 100}%`;
+            document.getElementById('explanation').textContent = data.explanation;
+            
+            // Show results
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+        } catch (error) {
+            alert('Error occurred during classification. Please try again.');
+            console.error('Error:', error);
+        } finally {
+            // Reset button state
+            classifyBtn.disabled = false;
+            btnText.textContent = 'Classify Paraphrase Type';
+            loadingSpinner.classList.add('hidden');
+        }
+    });
+    
+    // Try another button
+    document.getElementById('try-another').addEventListener('click', function() {
+        document.getElementById('sentence1').value = '';
+        document.getElementById('sentence2').value = '';
+        resultsSection.classList.add('hidden');
+        document.getElementById('sentence1').focus();
+    });
+});
+</script>
+{% endblock %}

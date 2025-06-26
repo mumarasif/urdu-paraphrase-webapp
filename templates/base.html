@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Urdu Paraphrase Classification{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for Urdu -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .urdu-text {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .english-text {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        /* Dark mode styles */
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-white {
+            background-color: #2d3748 !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+        
+        .dark .text-gray-600 {
+            color: #a0aec0 !important;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #4a5568 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold text-gray-800 english-text">
+                            <i class="fas fa-language text-indigo-600 mr-2"></i>
+                            Urdu Paraphrase NLP
+                        </h1>
+                    </div>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{% url 'paraphrase_app:home' %}" 
+                           class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
+                            <i class="fas fa-home mr-1"></i> Home
+                        </a>
+                        <a href="{% url 'paraphrase_app:classify' %}" 
+                           class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
+                            <i class="fas fa-search mr-1"></i> Classify
+                        </a>
+                        <a href="{% url 'paraphrase_app:paraphrase' %}" 
+                           class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
+                            <i class="fas fa-edit mr-1"></i> Paraphrase
+                        </a>
+                        <a href="{% url 'paraphrase_app:eda' %}" 
+                           class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
+                            <i class="fas fa-chart-bar mr-1"></i> EDA
+                        </a>
+                        <button id="theme-toggle" class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-moon" id="theme-icon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-indigo-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
+                <a href="{% url 'paraphrase_app:home' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="{% url 'paraphrase_app:classify' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-search mr-2"></i> Classify
+                </a>
+                <a href="{% url 'paraphrase_app:paraphrase' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-edit mr-2"></i> Paraphrase
+                </a>
+                <a href="{% url 'paraphrase_app:eda' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-chart-bar mr-2"></i> EDA
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <p class="text-gray-600 english-text">
+                    <i class="fas fa-graduation-cap mr-2 text-indigo-600"></i>
+                    Final Year Project – Urdu Paraphrase Type Identification 2025
+                </p>
+                <p class="text-sm text-gray-500 mt-2 english-text">
+                    Developed with ❤️ for Natural Language Processing Research
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const html = document.documentElement;
+
+        function updateTheme() {
+            if (localStorage.getItem('theme') === 'dark') {
+                html.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                html.classList.remove('dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        themeToggle.addEventListener('click', function() {
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+            updateTheme();
+        });
+
+        // Initialize theme
+        updateTheme();
+    </script>
+</body>
+</html>

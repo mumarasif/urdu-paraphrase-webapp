@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Paraphrase - Urdu Paraphrase Classification{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 english-text mb-4">
+            <i class="fas fa-edit mr-3 text-green-600"></i>
+            Paraphrase Generation & Classification
+        </h1>
+        <p class="text-gray-600 english-text max-w-2xl mx-auto">
+            Enter an Urdu sentence to generate its paraphrase from LLM and automatically classify the paraphrase type.
+        </p>
+    </div>
+
+    <!-- Generation Form -->
+    <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+        <form id="paraphrase-form">
+            <div class="mb-8">
+                <label for="original-sentence" class="block text-sm font-medium text-gray-700 english-text mb-3">
+                    <i class="fas fa-pen-alt mr-2 text-green-600"></i>
+                    Original Sentence
+                </label>
+                <textarea id="original-sentence" name="original-sentence" rows="4" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent urdu-text text-lg resize-none"
+                          placeholder="یہاں اردو جملہ لکھیں جس کا پیرافریز بنانا ہے..."></textarea>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" id="generate-btn" 
+                        class="inline-flex items-center px-8 py-4 bg-green-600 text-white rounded-xl font-semibold text-lg hover:bg-green-700 hover:shadow-lg transition-all">
+                    <i class="fas fa-magic mr-3"></i>
+                    <span id="btn-text">Generate Paraphrase</span>
+                    <div id="loading-spinner" class="hidden ml-3">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+        <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 english-text mb-8 text-center">
+                <i class="fas fa-check-circle mr-3 text-green-600"></i>
+                Generated Paraphrase & Analysis
+            </h3>
+            
+            <!-- Sentence Comparison -->
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-quote-left mr-2 text-blue-600"></i>
+                        Original Sentence
+                    </h4>
+                    <p id="original-display" class="urdu-text text-xl text-gray-800 leading-relaxed min-h-[60px]"></p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-quote-right mr-2 text-green-600"></i>
+                        Generated Paraphrase
+                    </h4>
+                    <p id="paraphrased-display" class="urdu-text text-xl text-gray-800 leading-relaxed min-h-[60px]"></p>
+                </div>
+            </div>
+            
+            <!-- Classification Results -->
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-tag mr-2 text-purple-600"></i>
+                        Paraphrase Type
+                    </h4>
+                    <div id="paraphrase-type" class="text-3xl font-bold text-purple-600 english-text mb-2"></div>
+                    <div class="text-sm text-gray-600 english-text">Relationship Classification</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-chart-bar mr-2 text-orange-600"></i>
+                        Confidence Score
+                    </h4>
+                    <div id="confidence-score" class="text-3xl font-bold text-orange-600 english-text mb-2"></div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="confidence-bar" class="bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full transition-all duration-1000"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="text-center space-x-4">
+                <button id="regenerate-btn" 
+                        class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+                    <i class="fas fa-redo mr-2"></i>
+                    Regenerate
+                </button>
+                <button id="try-new" 
+                        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>
+                    Try New Sentence
+                </button>
+                <a href="{% url 'paraphrase_app:classify' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-search mr-2"></i>
+                    Manual Classification
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="bg-white rounded-2xl p-8 card-shadow">
+        <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+            <i class="fas fa-lightbulb mr-3 text-yellow-600"></i>
+            Tips for Better Results
+        </h3>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                    <i class="fas fa-check-circle mr-2 text-green-600"></i>
+                    Best Practices
+                </h4>
+                <ul class="space-y-3 text-gray-600 english-text">
+                    <li class="flex items-start">
+                        <i class="fas fa-dot-circle mr-3 text-green-500 mt-1"></i>
+                        Use complete, grammatically correct Urdu sentences
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-dot-circle mr-3 text-green-500 mt-1"></i>
+                        Avoid very short or incomplete phrases
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-dot-circle mr-3 text-green-500 mt-1"></i>
+                        Include proper Urdu punctuation marks
+                    </li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                    Paraphrase Types
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Lexical</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Syntactic</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Semantic</span>
+                    <span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">Morphological</span>
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">Compound</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">Phrasal</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('paraphrase-form');
+    const generateBtn = document.getElementById('generate-btn');
+    const btnText = document.getElementById('btn-text');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const resultsSection = document.getElementById('results-section');
+    const originalSentence = document.getElementById('original-sentence');
+    
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const sentence = originalSentence.value.trim();
+        
+        if (!sentence) {
+            alert('Please enter a sentence');
+            return;
+        }
+        
+        // Show loading state
+        generateBtn.disabled = true;
+        btnText.textContent = 'Generating...';
+        loadingSpinner.classList.remove('hidden');
+        resultsSection.classList.add('hidden');
+        
+        try {
+            const response = await fetch('{% url "paraphrase_app:api_paraphrase" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    sentence: sentence
+                })
+            });
+            
+            const data = await response.json();
+            
+            // Display results
+            document.getElementById('original-display').textContent = data.original;
+            document.getElementById('paraphrased-display').textContent = data.paraphrased;
+            document.getElementById('paraphrase-type').textContent = data.paraphrase_type;
+            document.getElementById('confidence-score').textContent = `${(data.confidence * 100).toFixed(1)}%`;
+            document.getElementById('confidence-bar').style.width = `${data.confidence * 100}%`;
+            
+            // Show results
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+        } catch (error) {
+            alert('Error occurred during paraphrase generation. Please try again.');
+            console.error('Error:', error);
+        } finally {
+            // Reset button state
+            generateBtn.disabled = false;
+            btnText.textContent = 'Generate Paraphrase';
+            loadingSpinner.classList.add('hidden');
+        }
+    });
+    
+    // Regenerate button
+    document.getElementById('regenerate-btn').addEventListener('click', function() {
+        form.dispatchEvent(new Event('submit'));
+    });
+    
+    // Try new sentence button
+    document.getElementById('try-new').addEventListener('click', function() {
+        originalSentence.value = '';
+        resultsSection.classList.add('hidden');
+        originalSentence.focus();
+    });
+});
+</script>
+{% endblock %}
