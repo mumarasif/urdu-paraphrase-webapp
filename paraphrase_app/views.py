@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .model_loader import tokenizer, model, label_encoder, MAX_SEQ_LENGTH
+from django.conf import settings
+import google.generativeai as genai
+import numpy as np
 import json
 import random
 
@@ -27,6 +31,19 @@ def eda(request):
     }
     return render(request, 'paraphrase_app/eda.html', context)
 
+
+@csrf_exempt
+def preprocess(sentence1, sentence2):
+    tokens_1 = tokenizer(sentence1, truncation=True, padding='max_length', max_length=MAX_SEQ_LENGTH, return_tensors='tf')
+    tokens_2 = tokenizer(sentence2, truncation=True, padding='max_length', max_length=MAX_SEQ_LENGTH, return_tensors='tf')
+
+    return {
+        "input_ids_1": tokens_1["input_ids"],
+        "attention_mask_1": tokens_1["attention_mask"],
+        "input_ids_2": tokens_2["input_ids"],
+        "attention_mask_2": tokens_2["attention_mask"],
+    }
+
 @csrf_exempt
 def api_classify(request):
     if request.method == 'POST':
@@ -34,10 +51,12 @@ def api_classify(request):
         sentence1 = data.get('sentence1', '')
         sentence2 = data.get('sentence2', '')
         
-        # Mock classification result
-        paraphrase_types = ['Lexical', 'Syntactic', 'Semantic', 'Morphological', 'Compound', 'Phrasal']
-        result_type = random.choice(paraphrase_types)
-        confidence = round(random.uniform(0.7, 0.95), 3)
+        inputs = preprocess(sentence1, sentence2)
+        probs = model.predict(inputs)
+        pred_class = np.argmax(probs, axis=1)[0]
+        result_type = label_encoder.inverse_transform([pred_class])[0]
+        confidence = float(probs[0][pred_class])  
+
         
         return JsonResponse({
             'paraphrase_type': result_type,
@@ -47,7 +66,50 @@ def api_classify(request):
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+# Configure Gemini API
+genai.configure(api_key=settings.GEMINI_API_KEY)
+
 @csrf_exempt
+def generate_paraphrase_with_gemini(prompt_text):
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    prompt = f"Only give Paraphrased version of the following sentence in Urdu:\n\n{prompt_text}"
+    
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"Gemini API error: {e}")
+        return prompt_text + " (paraphrased)"
+    
+
+@csrf_exempt
+def api_paraphrase(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        original_sentence = data.get('sentence', '')
+
+        # Generate paraphrase using Gemini
+        generated_paraphrase = generate_paraphrase_with_gemini(original_sentence)
+
+        # Predict paraphrase type using your model
+        inputs = preprocess(original_sentence, generated_paraphrase)
+        probs = model.predict(inputs)
+        pred_class = np.argmax(probs, axis=1)[0]
+        confidence = float(probs[0][pred_class])
+        result_type = label_encoder.inverse_transform([pred_class])[0]
+
+        return JsonResponse({
+            'original': original_sentence,
+            'paraphrased': generated_paraphrase,
+            'paraphrase_type': result_type,
+            'confidence': confidence,
+            'explanation': f'The paraphrased sentence shows {result_type.lower()} paraphrasing with {confidence*100:.1f}% confidence.'
+        })
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+"""
 def api_paraphrase(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -75,3 +137,4 @@ def api_paraphrase(request):
         })
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+"""
