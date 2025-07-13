@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Classify - Urdu Paraphrase Classification{% endblock %}
+{% block title %}Classify - Urdu Paraphrase Type Identification{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -8,7 +8,7 @@
     <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-800 english-text mb-4">
             <i class="fas fa-search mr-3 text-indigo-600"></i>
-            Sentence Pair Classification
+            Sentence Pair Type Identification
         </h1>
         <p class="text-gray-600 english-text max-w-2xl mx-auto">
             Enter two Urdu sentences to identify the type of paraphrase relationship between them with confidence scoring.
@@ -43,7 +43,6 @@
             <div class="text-center">
                 <button type="submit" id="classify-btn" 
                         class="inline-flex items-center px-8 py-4 btn-primary text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all">
-                    <i class="fas fa-brain mr-3"></i>
                     <span id="btn-text">Classify Paraphrase Type</span>
                     <div id="loading-spinner" class="hidden ml-3">
                         <i class="fas fa-spinner fa-spin"></i>
@@ -193,7 +192,7 @@
             <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer sample-example"
                  data-s1="میں کل دفتر جاؤں گا" data-s2="میں کل کام پر جاؤں گا">
                 <div class="flex items-center mb-3">
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Lexical</span>
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Semantic changes</span>
                 </div>
                 <p class="urdu-text text-gray-800 mb-2">میں کل دفتر جاؤں گا</p>
                 <p class="urdu-text text-gray-600">میں کل کام پر جاؤں گا</p>

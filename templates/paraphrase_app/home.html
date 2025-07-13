@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - Urdu Paraphrase Classification{% endblock %}
+{% block title %}Home - Urdu Paraphrase Type Identification{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -8,15 +8,14 @@
     <div class="text-center mb-16">
         <div class="gradient-bg rounded-3xl p-12 text-white mb-12">
             <h1 class="text-4xl md:text-6xl font-bold english-text mb-6">
-                <i class="fas fa-language mr-4"></i>
-                Urdu Paraphrase Classification
+                
+                Urdu Paraphrase Type Identification
             </h1>
             <p class="text-xl english-text mb-8 opacity-90 max-w-3xl mx-auto">
                 Advanced NLP model for identifying 14 different types of paraphrases in Urdu text pairs with high accuracy and confidence scoring.
             </p>
             <a href="{% url 'paraphrase_app:classify' %}" 
                class="inline-flex items-center px-8 py-4 bg-white text-indigo-600 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg">
-                <i class="fas fa-rocket mr-3"></i>
                 Get Started
             </a>
         </div>
@@ -94,7 +93,6 @@
         <div class="grid md:grid-cols-2 gap-12 items-center">
             <div>
                 <h2 class="text-3xl font-bold text-gray-800 english-text mb-6">
-                    <i class="fas fa-brain mr-3 text-indigo-600"></i>
                     About This Project
                 </h2>
                 <p class="text-gray-600 english-text mb-6 leading-relaxed">
@@ -114,15 +112,9 @@
             </div>
             <div class="text-center">
                 <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8">
-                    <h3 class="text-2xl font-bold text-gray-800 urdu-text mb-4">
-                        اردو متن کا تجزیہ
-                    </h3>
                     <p class="text-gray-600 urdu-text mb-6 leading-relaxed">
                         یہ ایک جدید ترین قدرتی زبان کی پروسیسنگ کا نمونہ ہے جو اردو جملوں میں مختلف قسم کے پیرافریز کی شناخت کرتا ہے۔ یہ سسٹم ۱۴ مختلف اقسام کے پیرافریز میں فرق کر سکتا ہے۔
                     </p>
-                    <div class="text-4xl text-indigo-600 mb-4">
-                        <i class="fas fa-language"></i>
-                    </div>
                 </div>
             </div>
         </div>

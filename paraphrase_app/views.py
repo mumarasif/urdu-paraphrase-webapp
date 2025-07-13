@@ -26,14 +26,16 @@ def document_prediction(request):
 
 def eda(request):
     # Comprehensive sample data for EDA visualizations
-    total_tokens = 34520
-    total_sentences = 2266
-    unique_words = 8947
+    total_tokens = 196254
+    total_sentences = 10500
+    unique_words = 12212
+    urdu_words = ['کے', 'کی', 'میں', 'نے', 'کا', 'سے', 'کو', 'ہے', 'اور', 'پر']
+    counts = [8243, 6262, 6129, 5239, 3519, 3099, 3057, 2990, 2713, 2412]
     
     context = {
         # Corpus Overview
         'corpus_stats': {
-            'total_sentence_pairs': 1133,
+            'total_sentence_pairs': 5250,
             'total_sentences': total_sentences,
             'total_tokens': total_tokens,
             'unique_words': unique_words,
@@ -44,39 +46,40 @@ def eda(request):
         
         # Paraphrase Type Distribution
         'class_distribution': {
-            'labels': ['Lexical', 'Syntactic', 'Semantic', 'Morphological', 'Compound', 'Phrasal', 'Structural', 'Contextual', 'Stylistic', 'Discourse', 'Pragmatic', 'Temporal', 'Modal', 'Negation'],
-            'data': [145, 132, 128, 98, 87, 76, 65, 58, 52, 48, 43, 38, 35, 28],
-            'percentages': [12.8, 11.6, 11.3, 8.7, 7.7, 6.7, 5.7, 5.1, 4.6, 4.2, 3.8, 3.4, 3.1, 2.5]
-        },
-        
+            'labels': ['Inflectional changes', 'Derivational changes', 'Spelling and format changes', 'Same-polarity substitutions', 'Synthetic–analytic substitutions', 'Opposite-polarity substitutions', 'Diathesis alterations', 'Negation switching', 'Punctuation and format changes', 'Direct/Indirect style alterations', 'Semantic changes', 'Change of order', 'Addition/deletion of information', 'English to Urdu translation changes'],
+            'data': [145, 118, 920, 633, 421, 200, 99, 81, 477, 248, 565, 253, 942, 148],
+            'percentages': [ 4.1, 3.3,26.1, 18.0, 11.9, 5.7, 2.8, 2.3, 13.6, 7.0, 16.0, 7.2, 26.8, 4.2]
+        },        
+
         # Sentence Length Analysis
         'length_stats': {
-            'labels': ['1-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+'],
-            'data': [89, 234, 312, 267, 156, 58, 17],
-            'avg_length': 15.8,
+            'labels': json.dumps(['1-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+']),
+            'data': json.dumps([300, 1383, 1153, 486, 389, 216, 1519]),
+            'avg_length': 36,
             'min_length': 3,
-            'max_length': 42
+            'max_length': 771
         },
         
         # Top Frequent Words
+        'frequent_words_list': list(zip(urdu_words, counts)),  # for template loop
         'frequent_words': {
-            'urdu_words': ['ہے', 'کا', 'میں', 'کو', 'سے', 'اور', 'کے', 'پر', 'کی', 'نے', 'تھا', 'کہ', 'یہ', 'وہ', 'جو', 'کر', 'گا', 'تو', 'بھی', 'لیے'],
-            'counts': [1247, 892, 743, 621, 567, 489, 445, 398, 367, 334, 298, 276, 254, 231, 209, 187, 165, 143, 121, 99]
+            'urdu_words': urdu_words,
+            'counts': counts
         },
         
         # Stopword Statistics
         'stopword_stats': {
-            'total_stopwords': 12456,
-            'unique_stopwords': 87,
-            'stopword_percentage': 36.1,
-            'repeated_words': 2341
+            'total_stopwords': 50616,
+            'unique_stopwords': 187,
+            'stopword_percentage': 25.8,
+            'repeated_words': 7705
         },
         
         # Class Imbalance
         'class_imbalance': {
-            'most_samples': {'type': 'Lexical', 'count': 145},
-            'least_samples': {'type': 'Negation', 'count': 28},
-            'imbalance_ratio': 5.18  # most/least
+            'most_samples': {'type': 'Addition/deletion of information', 'count': 942},
+            'least_samples': {'type': 'Negation switching', 'count': 81},
+            'imbalance_ratio': 11.6  # most/least
         }
     }
     return render(request, 'paraphrase_app/eda.html', context)

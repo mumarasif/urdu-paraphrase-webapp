@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}EDA - Urdu Paraphrase Classification{% endblock %}
+{% block title %}EDA - Urdu Paraphrase Type Identification{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -10,9 +10,6 @@
             <i class="fas fa-chart-bar mr-3 text-purple-600"></i>
             Dataset Analysis & Insights
         </h1>
-        <h2 class="text-2xl font-semibold urdu-text mb-4">
-            ڈیٹاسیٹ کا تجزیہ اور بصیرت
-        </h2>
         <p class="text-gray-600 english-text max-w-3xl mx-auto">
             Comprehensive visual insights and statistical analysis of our Urdu paraphrase dataset used for training the classification model.
         </p>
@@ -31,7 +28,6 @@
                 </div>
                 <div class="text-3xl font-bold text-gray-800 english-text">{{ corpus_stats.total_sentence_pairs|floatformat:0 }}</div>
                 <div class="text-sm text-gray-600 english-text">Total Sentence Pairs</div>
-                <div class="text-xs text-gray-500 urdu-text mt-1">کل جملوں کے جوڑے</div>
             </div>
             
             <div class="bg-white rounded-2xl p-6 card-shadow text-center">
@@ -40,7 +36,6 @@
                 </div>
                 <div class="text-3xl font-bold text-gray-800 english-text">{{ corpus_stats.total_sentences|floatformat:0 }}</div>
                 <div class="text-sm text-gray-600 english-text">Total Sentences</div>
-                <div class="text-xs text-gray-500 urdu-text mt-1">کل جملے</div>
             </div>
             
             <div class="bg-white rounded-2xl p-6 card-shadow text-center">
@@ -49,7 +44,6 @@
                 </div>
                 <div class="text-3xl font-bold text-gray-800 english-text">{{ corpus_stats.total_tokens|floatformat:0 }}</div>
                 <div class="text-sm text-gray-600 english-text">Total Tokens</div>
-                <div class="text-xs text-gray-500 urdu-text mt-1">کل ٹوکنز</div>
             </div>
             
             <div class="bg-white rounded-2xl p-6 card-shadow text-center">
@@ -58,7 +52,6 @@
                 </div>
                 <div class="text-3xl font-bold text-gray-800 english-text">{{ corpus_stats.unique_words|floatformat:0 }}</div>
                 <div class="text-sm text-gray-600 english-text">Unique Words</div>
-                <div class="text-xs text-gray-500 urdu-text mt-1">منفرد الفاظ</div>
             </div>
         </div>
     </div>
@@ -72,7 +65,6 @@
                     <i class="fas fa-chart-bar mr-3 text-indigo-600"></i>
                     Paraphrase Type Distribution
                 </h3>
-                <p class="text-sm text-gray-600 urdu-text">پیرافریز کی اقسام کی تقسیم</p>
             </div>
             <div class="h-96">
                 <canvas id="classDistributionChart"></canvas>
@@ -86,7 +78,6 @@
                     <i class="fas fa-pie-chart mr-3 text-pink-600"></i>
                     Percentage Distribution
                 </h3>
-                <p class="text-sm text-gray-600 urdu-text">فیصد تقسیم</p>
             </div>
             <div class="h-96">
                 <canvas id="pieChart"></canvas>
@@ -101,7 +92,6 @@
                 <i class="fas fa-ruler mr-3 text-green-600"></i>
                 Sentence Length Analysis
             </h3>
-            <p class="text-sm text-gray-600 urdu-text">جملوں کی لمبائی کا تجزیہ</p>
         </div>
         
         <!-- Length Statistics -->
@@ -109,17 +99,14 @@
             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center">
                 <div class="text-2xl font-bold text-blue-600 english-text mb-2">{{ length_stats.avg_length }}</div>
                 <div class="text-sm text-gray-700 english-text">Average Length</div>
-                <div class="text-xs text-gray-500 urdu-text">اوسط لمبائی</div>
             </div>
             <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 text-center">
                 <div class="text-2xl font-bold text-green-600 english-text mb-2">{{ length_stats.min_length }}</div>
                 <div class="text-sm text-gray-700 english-text">Minimum Length</div>
-                <div class="text-xs text-gray-500 urdu-text">کم سے کم لمبائی</div>
             </div>
             <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 text-center">
                 <div class="text-2xl font-bold text-red-600 english-text mb-2">{{ length_stats.max_length }}</div>
                 <div class="text-sm text-gray-700 english-text">Maximum Length</div>
-                <div class="text-xs text-gray-500 urdu-text">زیادہ سے زیادہ لمبائی</div>
             </div>
         </div>
         
@@ -140,17 +127,16 @@
                     <i class="fas fa-list-ol mr-3 text-yellow-600"></i>
                     Top Frequent Words
                 </h3>
-                <p class="text-sm text-gray-600 urdu-text">سب سے زیادہ استعمال ہونے والے الفاظ</p>
             </div>
             <div class="h-96 overflow-y-auto">
                 <div class="space-y-3">
-                    {% for word in frequent_words.urdu_words|slice:":10" %}
+                    {% for word, count in frequent_words_list|slice:":10" %}
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div class="flex items-center">
                             <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium mr-3">{{ forloop.counter }}</span>
                             <span class="urdu-text text-lg font-medium text-gray-800">{{ word }}</span>
                         </div>
-                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">{{ frequent_words.counts|slice:forloop.counter0|first }}</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">{{ count }}</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -164,28 +150,23 @@
                     <i class="fas fa-filter mr-3 text-red-600"></i>
                     Stopword Statistics
                 </h3>
-                <p class="text-sm text-gray-600 urdu-text">اسٹاپ ورڈز کی تفصیلات</p>
             </div>
             <div class="space-y-6">
                 <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-red-600 english-text mb-2">{{ stopword_stats.total_stopwords|floatformat:0 }}</div>
                     <div class="text-sm text-gray-700 english-text">Total Stopwords</div>
-                    <div class="text-xs text-gray-500 urdu-text">کل اسٹاپ ورڈز</div>
                 </div>
                 <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-orange-600 english-text mb-2">{{ stopword_stats.unique_stopwords }}</div>
                     <div class="text-sm text-gray-700 english-text">Unique Stopwords</div>
-                    <div class="text-xs text-gray-500 urdu-text">منفرد اسٹاپ ورڈز</div>
                 </div>
                 <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-purple-600 english-text mb-2">{{ stopword_stats.stopword_percentage }}%</div>
                     <div class="text-sm text-gray-700 english-text">Stopword Percentage</div>
-                    <div class="text-xs text-gray-500 urdu-text">اسٹاپ ورڈز کا فیصد</div>
-                </div>
+                    </div>
                 <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-teal-600 english-text mb-2">{{ stopword_stats.repeated_words|floatformat:0 }}</div>
                     <div class="text-sm text-gray-700 english-text">Repeated Words</div>
-                    <div class="text-xs text-gray-500 urdu-text">دہرائے گئے الفاظ</div>
                 </div>
             </div>
         </div>
@@ -200,7 +181,6 @@
                     <i class="fas fa-balance-scale mr-3 text-purple-600"></i>
                     Class Imbalance Analysis
                 </h3>
-                <p class="text-sm text-gray-600 urdu-text">کلاس عدم توازن کا تجزیہ</p>
             </div>
             <div class="space-y-6">
                 <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6">
@@ -240,24 +220,20 @@
                     <i class="fas fa-book-open mr-3 text-indigo-600"></i>
                     Vocabulary Insights
                 </h3>
-                <p class="text-sm text-gray-600 urdu-text">لغت کی بصیرت</p>
             </div>
             <div class="space-y-6">
                 <div class="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-indigo-600 english-text mb-2">{{ corpus_stats.vocabulary_size|floatformat:0 }}</div>
                     <div class="text-sm text-gray-700 english-text">Vocabulary Size</div>
-                    <div class="text-xs text-gray-500 urdu-text">لغت کا سائز</div>
                 </div>
                 <div class="bg-gradient-to-r from-teal-50 to-green-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-teal-600 english-text mb-2">{{ corpus_stats.lexical_diversity|floatformat:3 }}</div>
                     <div class="text-sm text-gray-700 english-text">Lexical Diversity</div>
-                    <div class="text-xs text-gray-500 urdu-text">لغوی تنوع</div>
                     <div class="text-xs text-gray-400 english-text mt-1">Unique words / Total tokens</div>
                 </div>
                 <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
                     <div class="text-3xl font-bold text-purple-600 english-text mb-2">{{ corpus_stats.word_density|floatformat:1 }}</div>
                     <div class="text-sm text-gray-700 english-text">Word Density</div>
-                    <div class="text-xs text-gray-500 urdu-text">الفاظ کی کثافت</div>
                     <div class="text-xs text-gray-400 english-text mt-1">Average tokens per sentence</div>
                 </div>
             </div>
@@ -271,7 +247,6 @@
                 <i class="fas fa-chart-area mr-3 text-cyan-600"></i>
                 Word Frequency Distribution
             </h3>
-            <p class="text-sm text-gray-600 urdu-text">الفاظ کی تعدد کی تقسیم</p>
         </div>
         <div class="h-80">
             <canvas id="wordFrequencyChart"></canvas>
@@ -293,18 +268,18 @@
             <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-                        <i class="fas fa-word mr-2"></i>Lexical Paraphrase
+                        <i class="fas fa-word mr-2"></i>Inflectional changes
                     </span>
-                    <span class="text-sm text-gray-500 english-text">95.2% Confidence</span>
+                    <span class="text-sm text-gray-500 english-text">96.2% Confidence</span>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600 english-text mb-2">Original:</p>
-                        <p class="urdu-text text-gray-800 text-lg">میں کل دفتر جاؤں گا</p>
+                        <p class="urdu-text text-gray-800 text-lg">ہمیں دوسروں کی مدد کرنی چاہیے۔</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 english-text mb-2">Paraphrase:</p>
-                        <p class="urdu-text text-gray-800 text-lg">میں کل کام پر جاؤں گا</p>
+                        <p class="urdu-text text-gray-800 text-lg">دوسروں کا ساتھ دینا ہمارا فرض ہے۔</p>
                     </div>
                 </div>
             </div>
@@ -313,18 +288,18 @@
             <div class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-                        <i class="fas fa-code-branch mr-2"></i>Syntactic Paraphrase
+                        <i class="fas fa-code-branch mr-2"></i>Negation Switching
                     </span>
-                    <span class="text-sm text-gray-500 english-text">89.7% Confidence</span>
+                    <span class="text-sm text-gray-500 english-text">97% Confidence</span>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600 english-text mb-2">Original:</p>
-                        <p class="urdu-text text-gray-800 text-lg">بچہ کھیل رہا ہے</p>
+                        <p class="urdu-text text-gray-800 text-lg">وہ خوش ہے۔</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 english-text mb-2">Paraphrase:</p>
-                        <p class="urdu-text text-gray-800 text-lg">کھیل رہا ہے بچہ</p>
+                        <p class="urdu-text text-gray-800 text-lg">وہ ناخوش نہیں ہے۔</p>
                     </div>
                 </div>
             </div>

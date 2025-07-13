@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Urdu Paraphrase Classification{% endblock %}</title>
+    <title>{% block title %}Urdu Paraphrase Type Identification{% endblock %}</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -75,7 +75,7 @@
                     <div class="flex-shrink-0">
                         <h1 class="text-xl font-bold text-gray-800 english-text">
                             <i class="fas fa-language text-indigo-600 mr-2"></i>
-                            Urdu Paraphrase NLP
+                            UPT
                         </h1>
                     </div>
                 </div>
@@ -94,13 +94,13 @@
                            class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
                             <i class="fas fa-edit mr-1"></i> Paraphrase
                         </a>
-                        <a href="{% url 'paraphrase_app:eda' %}" 
-                           class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
-                            <i class="fas fa-chart-bar mr-1"></i> EDA
-                        </a>
                         <a href="{% url 'paraphrase_app:document_prediction' %}" 
                            class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
                             <i class="fas fa-file-alt mr-1"></i> Document Prediction
+                        </a>
+                        <a href="{% url 'paraphrase_app:eda' %}" 
+                           class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium english-text transition-colors">
+                            <i class="fas fa-chart-bar mr-1"></i> EDA
                         </a>
                         <button id="theme-toggle" class="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-moon" id="theme-icon"></i>
@@ -129,11 +129,11 @@
                 <a href="{% url 'paraphrase_app:paraphrase' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
                     <i class="fas fa-edit mr-2"></i> Paraphrase
                 </a>
-                <a href="{% url 'paraphrase_app:eda' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
-                    <i class="fas fa-chart-bar mr-2"></i> EDA
-                </a>
                 <a href="{% url 'paraphrase_app:document_prediction' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
                     <i class="fas fa-file-alt mr-2"></i> Document Prediction
+                </a>
+                <a href="{% url 'paraphrase_app:eda' %}" class="block text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-chart-bar mr-2"></i> EDA
                 </a>
             </div>
         </div>
@@ -151,10 +151,7 @@
             <div class="text-center">
                 <p class="text-gray-600 english-text">
                     <i class="fas fa-graduation-cap mr-2 text-indigo-600"></i>
-                    Final Year Project – Urdu Paraphrase Type Identification 2025
-                </p>
-                <p class="text-sm text-gray-500 mt-2 english-text">
-                    Developed with ❤️ for Natural Language Processing Research
+                    2025 © UPT. All rights reserved.
                 </p>
             </div>
         </div>
