@@ -25,15 +25,58 @@ def document_prediction(request):
     return render(request, 'paraphrase_app/document_prediction.html')
 
 def eda(request):
-    # Sample data for EDA visualizations
+    # Comprehensive sample data for EDA visualizations
+    total_tokens = 34520
+    total_sentences = 2266
+    unique_words = 8947
+    
     context = {
+        # Corpus Overview
+        'corpus_stats': {
+            'total_sentence_pairs': 1133,
+            'total_sentences': total_sentences,
+            'total_tokens': total_tokens,
+            'unique_words': unique_words,
+            'vocabulary_size': unique_words,
+            'lexical_diversity': round(unique_words / total_tokens, 3),  # unique words / total tokens
+            'word_density': round(total_tokens / total_sentences, 1)  # average tokens per sentence
+        },
+        
+        # Paraphrase Type Distribution
         'class_distribution': {
             'labels': ['Lexical', 'Syntactic', 'Semantic', 'Morphological', 'Compound', 'Phrasal', 'Structural', 'Contextual', 'Stylistic', 'Discourse', 'Pragmatic', 'Temporal', 'Modal', 'Negation'],
-            'data': [145, 132, 128, 98, 87, 76, 65, 58, 52, 48, 43, 38, 35, 28]
+            'data': [145, 132, 128, 98, 87, 76, 65, 58, 52, 48, 43, 38, 35, 28],
+            'percentages': [12.8, 11.6, 11.3, 8.7, 7.7, 6.7, 5.7, 5.1, 4.6, 4.2, 3.8, 3.4, 3.1, 2.5]
         },
+        
+        # Sentence Length Analysis
         'length_stats': {
-            'labels': ['1-10', '11-20', '21-30', '31-40', '41-50', '50+'],
-            'data': [45, 128, 234, 189, 87, 32]
+            'labels': ['1-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+'],
+            'data': [89, 234, 312, 267, 156, 58, 17],
+            'avg_length': 15.8,
+            'min_length': 3,
+            'max_length': 42
+        },
+        
+        # Top Frequent Words
+        'frequent_words': {
+            'urdu_words': ['ہے', 'کا', 'میں', 'کو', 'سے', 'اور', 'کے', 'پر', 'کی', 'نے', 'تھا', 'کہ', 'یہ', 'وہ', 'جو', 'کر', 'گا', 'تو', 'بھی', 'لیے'],
+            'counts': [1247, 892, 743, 621, 567, 489, 445, 398, 367, 334, 298, 276, 254, 231, 209, 187, 165, 143, 121, 99]
+        },
+        
+        # Stopword Statistics
+        'stopword_stats': {
+            'total_stopwords': 12456,
+            'unique_stopwords': 87,
+            'stopword_percentage': 36.1,
+            'repeated_words': 2341
+        },
+        
+        # Class Imbalance
+        'class_imbalance': {
+            'most_samples': {'type': 'Lexical', 'count': 145},
+            'least_samples': {'type': 'Negation', 'count': 28},
+            'imbalance_ratio': 5.18  # most/least
         }
     }
     return render(request, 'paraphrase_app/eda.html', context)

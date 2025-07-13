@@ -1,0 +1,414 @@
+{% extends 'base.html' %}
+
+{% block title %}Batch Classification - Urdu Paraphrase Classification{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 english-text mb-4">
+            <i class="fas fa-upload mr-3 text-blue-600"></i>
+            Batch Classification
+        </h1>
+        <p class="text-gray-600 english-text max-w-3xl mx-auto">
+            Upload a CSV file containing Urdu sentence pairs to classify multiple paraphrases at once. Get comprehensive results with confidence scores for each pair.
+        </p>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+        <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 english-text mb-4">
+                <i class="fas fa-file-csv mr-3 text-green-600"></i>
+                Upload CSV File
+            </h3>
+            <p class="text-gray-600 english-text mb-6">
+                Your CSV file should contain two columns: first sentence and second sentence (no headers required)
+            </p>
+        </div>
+
+        <!-- File Upload Area -->
+        <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-blue-400 transition-colors cursor-pointer">
+            <div id="upload-content">
+                <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                <h4 class="text-xl font-semibold text-gray-700 english-text mb-2">Drop your CSV file here</h4>
+                <p class="text-gray-500 english-text mb-4">or click to browse and select a file</p>
+                <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+                <button id="browse-btn" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    Browse Files
+                </button>
+            </div>
+            
+            <div id="file-selected" class="hidden">
+                <i class="fas fa-file-csv text-6xl text-green-500 mb-4"></i>
+                <h4 class="text-xl font-semibold text-gray-700 english-text mb-2">File Selected</h4>
+                <p id="file-name" class="text-gray-600 english-text mb-4"></p>
+                <div class="space-x-4">
+                    <button id="process-btn" class="inline-flex items-center px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                        <i class="fas fa-cogs mr-2"></i>
+                        <span id="process-text">Process File</span>
+                        <div id="process-spinner" class="hidden ml-2">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </button>
+                    <button id="change-file-btn" class="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-exchange-alt mr-2"></i>
+                        Change File
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSV Format Guide -->
+        <div class="mt-8 bg-blue-50 rounded-xl p-6">
+            <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                CSV Format Requirements
+            </h4>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h5 class="font-medium text-gray-700 english-text mb-2">Required Format:</h5>
+                    <ul class="text-sm text-gray-600 english-text space-y-1">
+                        <li>• Two columns: Sentence 1, Sentence 2</li>
+                        <li>• UTF-8 encoding for Urdu text</li>
+                        <li>• No headers required</li>
+                        <li>• Maximum 1000 rows per file</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-medium text-gray-700 english-text mb-2">Sample CSV Content:</h5>
+                    <div class="bg-white rounded p-3 text-sm font-mono">
+                        <div class="urdu-text text-gray-800">میں کل دفتر جاؤں گا,میں کل کام پر جاؤں گا</div>
+                        <div class="urdu-text text-gray-800">بچہ کھیل رہا ہے,کھیل رہا ہے بچہ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+        <!-- Summary Stats -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-list text-blue-600"></i>
+                </div>
+                <div id="total-processed" class="text-2xl font-bold text-gray-800 english-text">0</div>
+                <div class="text-sm text-gray-600 english-text">Total Processed</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                </div>
+                <div id="avg-confidence" class="text-2xl font-bold text-gray-800 english-text">0%</div>
+                <div class="text-sm text-gray-600 english-text">Avg Confidence</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-tags text-purple-600"></i>
+                </div>
+                <div id="unique-types" class="text-2xl font-bold text-gray-800 english-text">0</div>
+                <div class="text-sm text-gray-600 english-text">Unique Types</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 card-shadow text-center">
+                <div class="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-clock text-orange-600"></i>
+                </div>
+                <div id="processing-time" class="text-2xl font-bold text-gray-800 english-text">0s</div>
+                <div class="text-sm text-gray-600 english-text">Processing Time</div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="bg-white rounded-2xl p-8 card-shadow">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 english-text">
+                    <i class="fas fa-table mr-3 text-indigo-600"></i>
+                    Classification Results
+                </h3>
+                <div class="space-x-3">
+                    <button id="download-btn" class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Download Results
+                    </button>
+                    <button id="process-new-btn" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Process New File
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container with Scroll -->
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider english-text">Row</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider english-text">Sentence 1</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider english-text">Sentence 2</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider english-text">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider english-text">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Results will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="mt-6 flex items-center justify-between">
+                <div class="text-sm text-gray-700 english-text">
+                    Showing <span id="showing-start">1</span> to <span id="showing-end">10</span> of <span id="showing-total">0</span> results
+                </div>
+                <div class="space-x-2">
+                    <button id="prev-page" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="page-info" class="px-4 py-2 text-gray-700 english-text">Page 1 of 1</span>
+                    <button id="next-page" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors disabled:opacity-50" disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('csv-file-input');
+    const browseBtn = document.getElementById('browse-btn');
+    const uploadContent = document.getElementById('upload-content');
+    const fileSelected = document.getElementById('file-selected');
+    const fileName = document.getElementById('file-name');
+    const processBtn = document.getElementById('process-btn');
+    const changeFileBtn = document.getElementById('change-file-btn');
+    const resultsSection = document.getElementById('results-section');
+    
+    let currentResults = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let processingStartTime = 0;
+
+    // File upload handlers
+    uploadArea.addEventListener('click', () => fileInput.click());
+    browseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('border-blue-400', 'bg-blue-50');
+    });
+
+    uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        if (!file.name.endsWith('.csv')) {
+            alert('Please select a CSV file');
+            return;
+        }
+
+        fileName.textContent = file.name;
+        uploadContent.classList.add('hidden');
+        fileSelected.classList.remove('hidden');
+        fileInput.files = createFileList(file);
+    }
+
+    function createFileList(file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        return dt.files;
+    }
+
+    changeFileBtn.addEventListener('click', () => {
+        uploadContent.classList.remove('hidden');
+        fileSelected.classList.add('hidden');
+        fileInput.value = '';
+    });
+
+    processBtn.addEventListener('click', async () => {
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('Please select a file first');
+            return;
+        }
+
+        // Show loading state
+        processBtn.disabled = true;
+        document.getElementById('process-text').textContent = 'Processing...';
+        document.getElementById('process-spinner').classList.remove('hidden');
+        processingStartTime = Date.now();
+
+        const formData = new FormData();
+        formData.append('csv_file', file);
+
+        try {
+            const response = await fetch('{% url "paraphrase_app:api_batch_upload" %}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentResults = data.results;
+                displayResults();
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert(data.error || 'Error processing file');
+            }
+        } catch (error) {
+            alert('Error uploading file: ' + error.message);
+        } finally {
+            // Reset button state
+            processBtn.disabled = false;
+            document.getElementById('process-text').textContent = 'Process File';
+            document.getElementById('process-spinner').classList.add('hidden');
+        }
+    });
+
+    function displayResults() {
+        // Update summary stats
+        const processingTime = ((Date.now() - processingStartTime) / 1000).toFixed(1);
+        const avgConfidence = (currentResults.reduce((sum, r) => sum + r.confidence, 0) / currentResults.length * 100).toFixed(1);
+        const uniqueTypes = new Set(currentResults.map(r => r.paraphrase_type)).size;
+
+        document.getElementById('total-processed').textContent = currentResults.length;
+        document.getElementById('avg-confidence').textContent = avgConfidence + '%';
+        document.getElementById('unique-types').textContent = uniqueTypes;
+        document.getElementById('processing-time').textContent = processingTime + 's';
+
+        // Display table
+        displayPage(1);
+    }
+
+    function displayPage(page) {
+        currentPage = page;
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, currentResults.length);
+        const pageResults = currentResults.slice(startIndex, endIndex);
+
+        const tbody = document.getElementById('results-table-body');
+        tbody.innerHTML = '';
+
+        pageResults.forEach(result => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50';
+            
+            const confidenceColor = result.confidence >= 0.9 ? 'text-green-600' : 
+                                   result.confidence >= 0.8 ? 'text-yellow-600' : 'text-red-600';
+            
+            row.innerHTML = `
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 english-text">${result.row_number}</td>
+                <td class="px-4 py-4 text-sm text-gray-900 urdu-text max-w-xs truncate" title="${result.sentence1}">${result.sentence1}</td>
+                <td class="px-4 py-4 text-sm text-gray-900 urdu-text max-w-xs truncate" title="${result.sentence2}">${result.sentence2}</td>
+                <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">${result.paraphrase_type}</span>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm font-medium ${confidenceColor}">${(result.confidence * 100).toFixed(1)}%</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // Update pagination
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const totalPages = Math.ceil(currentResults.length / itemsPerPage);
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, currentResults.length);
+
+        document.getElementById('showing-start').textContent = startItem;
+        document.getElementById('showing-end').textContent = endItem;
+        document.getElementById('showing-total').textContent = currentResults.length;
+        document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+
+        document.getElementById('prev-page').disabled = currentPage === 1;
+        document.getElementById('next-page').disabled = currentPage === totalPages;
+    }
+
+    // Pagination handlers
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            displayPage(currentPage - 1);
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        const totalPages = Math.ceil(currentResults.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            displayPage(currentPage + 1);
+        }
+    });
+
+    // Download results
+    document.getElementById('download-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('{% url "paraphrase_app:download_batch_results" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    results: currentResults
+                })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'paraphrase_classification_results.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert('Error downloading results');
+            }
+        } catch (error) {
+            alert('Error downloading results: ' + error.message);
+        }
+    });
+
+    // Process new file
+    document.getElementById('process-new-btn').addEventListener('click', () => {
+        resultsSection.classList.add('hidden');
+        uploadContent.classList.remove('hidden');
+        fileSelected.classList.add('hidden');
+        fileInput.value = '';
+        currentResults = [];
+    });
+});
+</script>
+{% endblock %}
