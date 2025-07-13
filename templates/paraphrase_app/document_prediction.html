@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Document Prediction - Urdu Paraphrase Classification{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-800 english-text mb-4">
+            <i class="fas fa-file-alt mr-3 text-blue-600"></i>
+            Document Prediction
+        </h1>
+        <p class="text-gray-600 english-text max-w-2xl mx-auto">
+            Upload a CSV or Excel file with Sentence1 and Sentence2 columns to classify paraphrase types in bulk.
+        </p>
+    </div>
+    
+    <!-- Upload Form -->
+    <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+        <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+            <i class="fas fa-upload mr-3 text-green-600"></i>
+            Upload Document
+        </h3>
+        
+        <form id="document-upload-form" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            <div class="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 text-center">
+                <div class="space-y-2">
+                    <i class="fas fa-file-upload text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-600 english-text">Drag and drop your file here, or click to browse</p>
+                    <p class="text-sm text-gray-500 english-text">Supported formats: CSV, Excel (.xlsx)</p>
+                </div>
+                <input type="file" id="document-file" name="document" accept=".csv,.xlsx" class="hidden" />
+                <button type="button" id="browse-button" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-folder-open mr-2"></i> Browse Files
+                </button>
+            </div>
+            
+            <div id="file-details" class="hidden bg-blue-50 p-4 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-file-alt text-blue-500 mr-3 text-xl"></i>
+                    <div>
+                        <p id="file-name" class="font-medium text-blue-700"></p>
+                        <p id="file-size" class="text-sm text-blue-600"></p>
+                    </div>
+                    <button type="button" id="remove-file" class="ml-auto text-red-500 hover:text-red-700">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" id="predict-btn" 
+                        class="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg hover:bg-blue-700 hover:shadow-lg transition-all">
+                    <i class="fas fa-magic mr-2"></i>
+                    Process Document
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+        <div class="bg-white rounded-2xl p-8 card-shadow mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+                <i class="fas fa-chart-line mr-3 text-purple-600"></i>
+                Prediction Results
+            </h3>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-lg font-semibold text-gray-800 english-text">
+                        <i class="fas fa-table mr-2 text-indigo-600"></i>
+                        Results Preview
+                    </h4>
+                    <button id="download-results" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i> Download Results
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table id="results-table" class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead>
+                            <tr>
+                                <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b">Sentence 1</th>
+                                <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b">Sentence 2</th>
+                                <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b">Paraphrase Type</th>
+                                <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider border-b">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-body">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="text-center text-sm text-gray-500 english-text">
+                <p>Showing preview of results. Download the file for complete results.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-xl text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid mx-auto mb-4"></div>
+            <p class="text-lg font-medium text-gray-800 english-text">Processing Document...</p>
+            <p class="text-sm text-gray-600 english-text">This may take a moment depending on file size.</p>
+        </div>
+    </div>
+    
+    <!-- Tips Section -->
+    <div class="bg-white rounded-2xl p-8 card-shadow">
+        <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+            <i class="fas fa-lightbulb mr-3 text-yellow-600"></i>
+            Tips for Document Processing
+        </h3>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6">
+                <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                    <i class="fas fa-file-csv mr-2 text-orange-600"></i>
+                    File Format
+                </h4>
+                <ul class="space-y-2 text-gray-700 english-text">
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i> Ensure your file has columns named "Sentence1" and "Sentence2"</li>
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i> CSV files should use UTF-8 encoding for Urdu text</li>
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i> Excel files should be in .xlsx format</li>
+                </ul>
+            </div>
+            
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+                <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                    <i class="fas fa-cogs mr-2 text-indigo-600"></i>
+                    Processing
+                </h4>
+                <ul class="space-y-2 text-gray-700 english-text">
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i> Large files may take longer to process</li>
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i> Results will include the original sentences and predictions</li>
+                    <li><i class="fas fa-check-circle text-green-600 mr-2"></i> Download the results file for the complete dataset</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('document-upload-form');
+        const fileInput = document.getElementById('document-file');
+        const browseButton = document.getElementById('browse-button');
+        const fileDetails = document.getElementById('file-details');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const removeFile = document.getElementById('remove-file');
+        const predictBtn = document.getElementById('predict-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const resultsSection = document.getElementById('results-section');
+        const resultsBody = document.getElementById('results-body');
+        const downloadBtn = document.getElementById('download-results');
+        
+        // Browse button click handler
+        browseButton.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        // File input change handler
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileDetails.classList.remove('hidden');
+            }
+        });
+        
+        // Remove file button click handler
+        removeFile.addEventListener('click', function() {
+            fileInput.value = '';
+            fileDetails.classList.add('hidden');
+        });
+        
+        // Form submit handler
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (fileInput.files.length === 0) {
+                alert('Please select a file to upload.');
+                return;
+            }
+            
+            const formData = new FormData(form);
+            loadingIndicator.classList.remove('hidden');
+            
+            fetch('/api/document_prediction/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingIndicator.classList.add('hidden');
+                displayResults(data);
+            })
+            .catch(error => {
+                loadingIndicator.classList.add('hidden');
+                alert('Error processing document: ' + error.message);
+                console.error('Error:', error);
+            });
+        });
+        
+        // Download button click handler
+        downloadBtn.addEventListener('click', function() {
+            window.location.href = '/api/download_results/';
+        });
+        
+        // Helper function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Function to display results
+        function displayResults(data) {
+            resultsSection.classList.remove('hidden');
+            resultsBody.innerHTML = '';
+            
+            // Display first 10 results as preview
+            const previewData = data.preview || [];
+            previewData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 border-b urdu-text">${row.sentence1}</td>
+                    <td class="py-3 px-4 border-b urdu-text">${row.sentence2}</td>
+                    <td class="py-3 px-4 border-b english-text">${row.paraphrase_type}</td>
+                    <td class="py-3 px-4 border-b english-text">${(row.confidence * 100).toFixed(2)}%</td>
+                `;
+                resultsBody.appendChild(tr);
+            });
+            
+            // Scroll to results section
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .model_loader import tokenizer, model, label_encoder, MAX_SEQ_LENGTH
 from django.conf import settings
@@ -7,6 +7,10 @@ import google.generativeai as genai
 import numpy as np
 import json
 import random
+import pandas as pd
+import os
+import tempfile
+from datetime import datetime
 
 def home(request):
     return render(request, 'paraphrase_app/home.html')
@@ -16,6 +20,9 @@ def classify(request):
 
 def paraphrase(request):
     return render(request, 'paraphrase_app/paraphrase.html')
+
+def document_prediction(request):
+    return render(request, 'paraphrase_app/document_prediction.html')
 
 def eda(request):
     # Sample data for EDA visualizations
@@ -109,6 +116,113 @@ def api_paraphrase(request):
         })
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+# Global variable to store the latest processed results for download
+latest_results_df = None
+
+@csrf_exempt
+def api_document_prediction(request):
+    global latest_results_df
+    
+    if request.method == 'POST':
+        if 'document' not in request.FILES:
+            return JsonResponse({'error': 'No document file provided'}, status=400)
+        
+        document_file = request.FILES['document']
+        file_extension = os.path.splitext(document_file.name)[1].lower()
+        
+        try:
+            # Read the file based on its extension
+            if file_extension == '.csv':
+                df = pd.read_csv(document_file)
+            elif file_extension in ['.xlsx', '.xls']:
+                df = pd.read_excel(document_file)
+            else:
+                return JsonResponse({'error': 'Unsupported file format. Please upload CSV or Excel file.'}, status=400)
+            
+            # Check if required columns exist
+            if 'Sentence1' not in df.columns or 'Sentence2' not in df.columns:
+                return JsonResponse({'error': 'File must contain columns named "Sentence1" and "Sentence2"'}, status=400)
+            
+            # Process each row for prediction
+            results = []
+            for _, row in df.iterrows():
+                sentence1 = row['Sentence1']
+                sentence2 = row['Sentence2']
+                
+                # Skip empty rows
+                if pd.isna(sentence1) or pd.isna(sentence2) or sentence1.strip() == '' or sentence2.strip() == '':
+                    continue
+                
+                # Predict paraphrase type
+                inputs = preprocess(sentence1, sentence2)
+                probs = model.predict(inputs)
+                pred_class = np.argmax(probs, axis=1)[0]
+                confidence = float(probs[0][pred_class])
+                result_type = label_encoder.inverse_transform([pred_class])[0]
+                
+                results.append({
+                    'sentence1': sentence1,
+                    'sentence2': sentence2,
+                    'paraphrase_type': result_type,
+                    'confidence': confidence
+                })
+            
+            # Create a DataFrame with results
+            results_df = pd.DataFrame(results)
+            
+            # Store the results for download
+            latest_results_df = pd.DataFrame({
+                'Sentence1': results_df['sentence1'],
+                'Sentence2': results_df['sentence2'],
+                'Paraphrase_Type': results_df['paraphrase_type'],
+                'Confidence': results_df['confidence']
+            })
+            
+            # Return preview of results (first 10 rows)
+            preview = results[:10] if len(results) > 10 else results
+            
+            return JsonResponse({
+                'success': True,
+                'total_rows': len(results),
+                'preview': preview
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': f'Error processing file: {str(e)}'}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def download_results(request):
+    global latest_results_df
+    
+    if latest_results_df is None:
+        return HttpResponse('No results available for download', status=404)
+    
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp:
+        # Write the DataFrame to Excel
+        latest_results_df.to_excel(tmp.name, index=False, engine='openpyxl')
+        tmp_path = tmp.name
+    
+    # Read the file and create the response
+    with open(tmp_path, 'rb') as f:
+        file_data = f.read()
+    
+    # Delete the temporary file
+    os.unlink(tmp_path)
+    
+    # Create the response with appropriate headers
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    response = HttpResponse(
+        file_data,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename=paraphrase_results_{timestamp}.xlsx'
+    
+    return response
+
 """
 def api_paraphrase(request):
     if request.method == 'POST':
