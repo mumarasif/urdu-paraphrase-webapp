@@ -95,23 +95,63 @@ def preprocess(sentence1, sentence2):
     }
 
 @csrf_exempt
+def process_text_with_lughatnlp(text):
+    try:
+        from LughaatNLP import LughaatNLP
+        urdu_text_processing = LughaatNLP()
+        
+        normalized_text = urdu_text_processing.normalize(text)
+        filtered_text = urdu_text_processing.remove_stopwords(text)
+        stemmed_sentence = urdu_text_processing.urdu_stemmer(text)
+        tokens = urdu_text_processing.urdu_tokenize(text)
+        
+        return {
+            'normalized': normalized_text,
+            'filtered': filtered_text,
+            'stemmed': stemmed_sentence,
+            'tokens': tokens
+        }
+    except ImportError:
+        # If LughaatNLP is not installed, return empty results
+        return {
+            'normalized': text,
+            'filtered': text,
+            'stemmed': text,
+            'tokens': [text]
+        }
+    except Exception as e:
+        # Handle any other exceptions
+        print(f"Error processing text with LughaatNLP: {e}")
+        return {
+            'normalized': text,
+            'filtered': text,
+            'stemmed': text,
+            'tokens': [text]
+        }
+
+@csrf_exempt
 def api_classify(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         sentence1 = data.get('sentence1', '')
         sentence2 = data.get('sentence2', '')
         
+        # Process text with LughaatNLP
+        sentence1_processing = process_text_with_lughatnlp(sentence1)
+        sentence2_processing = process_text_with_lughatnlp(sentence2)
+        
         inputs = preprocess(sentence1, sentence2)
         probs = model.predict(inputs)
         pred_class = np.argmax(probs, axis=1)[0]
         result_type = label_encoder.inverse_transform([pred_class])[0]
         confidence = float(probs[0][pred_class])  
-
         
         return JsonResponse({
             'paraphrase_type': result_type,
             'confidence': confidence,
-            'explanation': f'The sentences show {result_type.lower()} paraphrasing with {confidence*100:.1f}% confidence.'
+            'explanation': f'The sentences show {result_type.lower()} paraphrasing with {confidence*100:.1f}% confidence.',
+            'sentence1_processing': sentence1_processing,
+            'sentence2_processing': sentence2_processing
         })
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)

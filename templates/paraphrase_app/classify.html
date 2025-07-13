@@ -53,6 +53,78 @@
         </form>
     </div>
 
+    <!-- Text Processing Section -->
+    <div id="text-processing-section" class="hidden mb-8">
+        <div class="bg-white rounded-2xl p-8 card-shadow">
+            <h3 class="text-2xl font-bold text-gray-800 english-text mb-6 text-center">
+                <i class="fas fa-cogs mr-3 text-purple-600"></i>
+                Text Processing Results
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Sentence 1 Processing -->
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-quote-left mr-2 text-indigo-600"></i>
+                        First Sentence Processing
+                    </h4>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Normalized Text:</p>
+                            <p id="sentence1-normalized" class="urdu-text text-gray-800"></p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Filtered Text (Stopwords Removed):</p>
+                            <p id="sentence1-filtered" class="urdu-text text-gray-800"></p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Stemmed Text:</p>
+                            <p id="sentence1-stemmed" class="urdu-text text-gray-800"></p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Tokenized Text:</p>
+                            <div id="sentence1-tokens" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sentence 2 Processing -->
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-800 english-text mb-4">
+                        <i class="fas fa-quote-right mr-2 text-indigo-600"></i>
+                        Second Sentence Processing
+                    </h4>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Normalized Text:</p>
+                            <p id="sentence2-normalized" class="urdu-text text-gray-800"></p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Filtered Text (Stopwords Removed):</p>
+                            <p id="sentence2-filtered" class="urdu-text text-gray-800"></p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Stemmed Text:</p>
+                            <p id="sentence2-stemmed" class="urdu-text text-gray-800"></p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm font-medium text-gray-700 english-text mb-2">Tokenized Text:</p>
+                            <div id="sentence2-tokens" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Results Section -->
     <div id="results-section" class="hidden">
         <div class="bg-white rounded-2xl p-8 card-shadow">
@@ -145,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const classifyBtn = document.getElementById('classify-btn');
     const btnText = document.getElementById('btn-text');
     const loadingSpinner = document.getElementById('loading-spinner');
+    const textProcessingSection = document.getElementById('text-processing-section');
     const resultsSection = document.getElementById('results-section');
     
     // Sample examples click handlers
@@ -154,6 +227,19 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('sentence2').value = this.dataset.s2;
         });
     });
+    
+    // Function to display token chips
+    function displayTokens(tokens, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        
+        tokens.forEach(token => {
+            const chip = document.createElement('span');
+            chip.className = 'bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-sm urdu-text';
+            chip.textContent = token;
+            container.appendChild(chip);
+        });
+    }
     
     // Form submission
     form.addEventListener('submit', async function(e) {
@@ -169,8 +255,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show loading state
         classifyBtn.disabled = true;
-        btnText.textContent = 'Classifying...';
+        btnText.textContent = 'Processing...';
         loadingSpinner.classList.remove('hidden');
+        textProcessingSection.classList.add('hidden');
         resultsSection.classList.add('hidden');
         
         try {
@@ -187,18 +274,36 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const data = await response.json();
             
-            // Display results
+            // Display text processing results
+            if (data.sentence1_processing) {
+                document.getElementById('sentence1-normalized').textContent = data.sentence1_processing.normalized;
+                document.getElementById('sentence1-filtered').textContent = data.sentence1_processing.filtered;
+                document.getElementById('sentence1-stemmed').textContent = data.sentence1_processing.stemmed;
+                displayTokens(data.sentence1_processing.tokens, 'sentence1-tokens');
+            }
+            
+            if (data.sentence2_processing) {
+                document.getElementById('sentence2-normalized').textContent = data.sentence2_processing.normalized;
+                document.getElementById('sentence2-filtered').textContent = data.sentence2_processing.filtered;
+                document.getElementById('sentence2-stemmed').textContent = data.sentence2_processing.stemmed;
+                displayTokens(data.sentence2_processing.tokens, 'sentence2-tokens');
+            }
+            
+            // Show text processing section
+            textProcessingSection.classList.remove('hidden');
+            textProcessingSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Display classification results
             document.getElementById('paraphrase-type').textContent = data.paraphrase_type;
             document.getElementById('confidence-score').textContent = `${(data.confidence * 100).toFixed(1)}%`;
             document.getElementById('confidence-bar').style.width = `${data.confidence * 100}%`;
             document.getElementById('explanation').textContent = data.explanation;
             
-            // Show results
+            // Show classification results
             resultsSection.classList.remove('hidden');
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
             
         } catch (error) {
-            alert('Error occurred during classification. Please try again.');
+            alert('Error occurred during processing. Please try again.');
             console.error('Error:', error);
         } finally {
             // Reset button state
@@ -212,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('try-another').addEventListener('click', function() {
         document.getElementById('sentence1').value = '';
         document.getElementById('sentence2').value = '';
+        textProcessingSection.classList.add('hidden');
         resultsSection.classList.add('hidden');
         document.getElementById('sentence1').focus();
     });
