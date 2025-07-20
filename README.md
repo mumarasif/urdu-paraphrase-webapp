@@ -139,8 +139,3 @@ This is a research project for academic purposes. For questions or suggestions, 
 ## License
 
 Academic use only. Please cite if used in research publications.
-
----
-
-**Final Year Project – Urdu NLP 2025**
-*Developed with ❤️ for Natural Language Processing Research*
